@@ -1,0 +1,17 @@
+REPORT
+
+1. I have found into the configuration program VARIABLE b32
+   which has been setted if your system has 32 bit architecture.
+   If you have 32 bit implementations that this variable setting to 
+   another way
+   -----------
+   So, I will use it to configure OpenSSL on OpenVMS on VAX.
+ 
+2. I have found into the ../crypto/include/internal/bn_conf.h_in the next line:
+   {- $config{b32}  ? "#define" : "#undef" -} THIRTY_TWO_BIT
+   -----------
+   So, I will use it to configure OpenSSL on an OpenVMS on a VAX.
+
+3. I have found into the ../crypto/ec/curve448 is not a good implementation
+   with header files:
+

@@ -1,0 +1,95 @@
+The goal is:
+
+Create a packet OpenSSL for using on VAX VMS:
+- on ODS-2 filesystem and other filesystems;
+- 32 bit implementation.
+=================================================
+
+A big step A)
+Rename if needed directory
+
+Step 1.
+Rename directories which include "." in the name to the same name with symbol "_"
+
+1. external/perl/Text-Template-1.46 -> external/perl/Text-Template-1_46
+2. external/perl/Text-Template-1.46/lib -> external/perl/Text-Template-1_46/lib
+3. external/perl/Text-Template-1.46/t -> external/perl/Text-Template-1_46/t
+
+Step 2.
+Rename directories level more then 5 like this: 5/6/7 to the 5_6_7
+
+1. openssl/external/perl/Text-Template-1.46/lib/Text ->
+   openssl/external/perl/Text-Template-1_46/lib_Text
+
+2. openssl/external/perl/Text-Template-1.46/lib/Text/Template ->
+   openssl/external/perl/Text-Template-1_46/lib_Text_Template
+
+===================================================
+A big step B)
+
+Step 1.
+
+All files which name begining with "." has been renamed to the filename without the first ".".
+
+Rename files with multiple dot symbol to the files with only first dot.
+All other dot will be replace to the symbol "_".
+
+1. apps/demoSRP/srp_verifier.txt.attr -> apps/demoSRP/srp_verifier.txt_attr
+2. Configurations/descrip.mms.tmpl -> Configurations/descrip.mms_tmpl
+3. doc/dir-locals.example.el -> doc/dir-locals.example_el
+4. VMS/openssl_ivp.com.in -> VMS/openssl_ivp.com_in
+5. VMS/openssl_shutdown.com.in -> VMS/openssl_shutdown.com_in
+6. VMS/openssl_startup.com.in -> VMS/openssl_startup.com_in
+7. VMS/openssl_utils.com.in -> VMS/openssl_utils.com_in
+-----------------------------------------
+8. crypto/include/internal/bn_conf.h.in -> crypto/include/internal/bn_conf.h_in
+9. crypto/include/internal/dso_conf.h.in -> crypto/include/internal/dso_conf.h_in
+-----------------------------------------
+10. include/openssl/opensslconf.h.in -> include/openssl/opensslconf.h_in
+
+Step 2.
+has been Changed build.info
+has been Changed ../Configurations/descrip.mms_tmpl
+has been changed ../Configurations/10-main.conf
+has been changed ../include/openssl/opensslconf.h_in
+
+Step 3.
+has been changed ../include/openssl/sha.h
+
+Step 4.
+has been changed ../crypto/include/cryptlib_int.h
+
+Step 5.
+has been created file ../include/openssl/types_only32bin.h
+
+Step 6.
+has been changed ../include/openssl/crypto.h
+
+Step 7.
+to compile file ../crypto/bf/bf_enc.c set /optimize=NODISJOINT
+
+Step 8.
+has been changed ../crypto/bio/bio_lcl.h
+
+Step 9.
+??has been changed ../crypto/bio/bss_bio.c
+
+Step 10.
+need to solve header files in the ../crypto/ec directory
+??has been changed  ../crypto/ec/curve448/word.h
+
+Step 11.
+has been changed ../crypto/init.c
+
+Step 12.
+to compile file ../crypto/ripemd/rmd_dgst.c set /optimize=NODISJOINT
+
+Step 14.
+to compile file ../crypto/seed/seed.c set /optimize=NODISJOINT
+
+Step 15.
+to compile file ../crypto/sm3/sm3.c set /optimize=NODISJOINT
+
+Step 16.
+to compile file ../crypto/sm4/sm4.c set /optimize=NODISJOINT
+
