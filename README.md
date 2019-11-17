@@ -20,7 +20,7 @@ The main idea is create an union like this:
 
 typedef union {           /* # define SHA_LONG32 unsigned int */
    unsigned int  i[2];
-   unsigned long l;
+   unsigned long long l;
    } SHA_LONG32;
 
 which will be use to test with original 64 bit implementation by unsigned long value (l).
