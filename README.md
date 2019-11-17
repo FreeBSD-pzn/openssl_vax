@@ -10,9 +10,9 @@ config_out.txt           - output from configdata.pm OpenSSL 1.1.1a
 exclude_files.txt        - the list of excluded files while compile on a VAX,
                            which include 64 bit implementation and need to
                            rewrite
-steps.txt                 - the list of made steps
-list_of_dir.txt           - simple list of directories in original package OpenSSL 1.1.1a
-list_of_files.txt         - simple list of files in original package OpenSSL 1.1.1a
+steps.txt                - the list of made steps
+list_of_dir.txt          - simple list of directories in original package OpenSSL 1.1.1a
+list_of_files.txt        - simple list of files in original package OpenSSL 1.1.1a
 
 The first step is CRYPTO/SHA directory.
 
