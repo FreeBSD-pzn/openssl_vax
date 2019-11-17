@@ -145,10 +145,6 @@ int SHA512_32Init(SHA512_32CTX *c)
  */
 void sha512_32block_data_order(SHA512_32CTX *ctx, const void *in, size_t num);
 
-/*
-   WORK THERE
- */
-
 
 
 int SHA512_32Final(unsigned char *md, SHA512_32CTX *c)
@@ -467,10 +463,6 @@ static const unsigned int K512_32[80][2] = {
 #endif    /* ifndef SHA512_ASM */
 
 
-
-/*****************************
-       WORK HERE
-*****************************/
 void get_K512_32( SHA_LONG32 *value, unsigned int cnt )
 {
   if( cnt < 80 )
@@ -493,3 +485,4 @@ void sha512_32block_data_order(SHA512_32CTX *ctx, const void *in, size_t num)
   tmp.i[1] = K512_32[0][1];
 }
 
+/*----------------------------------------------*/
