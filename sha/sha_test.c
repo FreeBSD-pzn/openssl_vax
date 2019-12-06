@@ -239,8 +239,6 @@ void ne32_64( SHA_LONG32 *p )
 }
 
 
-
-
 /*
  *===============================================================
  *===============================================================
@@ -251,6 +249,7 @@ void ne32_64( SHA_LONG32 *p )
 
 extern void get_K512_32( SHA_LONG32 *value, unsigned int cnt );
 extern void get_K512( unsigned long long *value, unsigned int cnt );
+extern void print_test_defines();
 
 int main()
 { 
@@ -372,6 +371,9 @@ int main()
 
   printf("[%016llX] == [%08X.%08X]\n", tmp.l, tmp.i[1], tmp.i[0]);
 
+  printf("============================================\n");
+
+  print_test_defines();
 
 
   printf("That is ALL.\n\n");

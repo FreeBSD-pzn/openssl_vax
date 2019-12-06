@@ -83,7 +83,7 @@ void or32_64( SHA_LONG32 *l, SHA_LONG32 *r );
  * #  define B(x,j)    (((SHA_LONG64)(*(((const unsigned char *)(&x))+j)))<<((7-j)*8))
  */
 
-SHA_LONG32 * B( SHA_LONG32 *x, int j )
+SHA_LONG32 * B_32( SHA_LONG32 *x, int j )
 {
   const unsigned char *p = (unsigned char *) x;
   unsigned int ch;
@@ -97,9 +97,14 @@ SHA_LONG32 * B( SHA_LONG32 *x, int j )
 
 /*
  * #  define PULL64(x) (B(x,0)|B(x,1)|B(x,2)|B(x,3)|B(x,4)|B(x,5)|B(x,6)|B(x,7))
+ *
+ *
+ *
+ *  Need to keep x, because x will contain the result
+ *
  */
 
-SHA_LONG32 * PULL64( SHA_LONG32 *x )
+SHA_LONG32 * PULL64_32( SHA_LONG32 *x )
 {
   /* need to  keep intermediate values */
   SHA_LONG32 tmp[8];
@@ -110,7 +115,7 @@ SHA_LONG32 * PULL64( SHA_LONG32 *x )
       tmp[i].i[0] = x->i[0];
       tmp[i].i[1] = x->i[1];
 
-      B( &tmp[i], i );             /* make B( x, 0 ... 7 ) */
+      B_32( &tmp[i], i );             /* make B( x, 0 ... 7 ) */
       /* Make
        * B(x,0)|B(x,1)|B(x,2)|B(x,3)|B(x,4)|B(x,5)|B(x,6)|B(x,7)
        * if tmp[0] | tmp[0] always will be tmp[0]
@@ -131,7 +136,7 @@ SHA_LONG32 * PULL64( SHA_LONG32 *x )
 
 /* #  define ROTR(x,s)  (((x)>>s) | (x)<<(64-s)) */
 
-SHA_LONG32 * ROTR( SHA_LONG32 *x, int s )
+SHA_LONG32 * ROTR_32( SHA_LONG32 *x, int s )
 {
   SHA_LONG32 tmp1, tmp2;
 
@@ -146,73 +151,98 @@ SHA_LONG32 * ROTR( SHA_LONG32 *x, int s )
 
 # endif
 
-/* # define Sigma0(x)       (ROTR((x),28) ^ ROTR((x),34) ^ ROTR((x),39)) */
+/* # define Sigma0(x)       (ROTR((x),28) ^ ROTR((x),34) ^ ROTR((x),39))
+ *
+ *
+ *  Need to keep x, because x will contain the result
+ *
+ */
 
-SHA_LONG32 * Sigma0( SHA_LONG32 *x )
+SHA_LONG32 * Sigma0_32( SHA_LONG32 *x )
 {
   SHA_LONG32 tmp1, tmp2, tmp3;
 
   tmp1.i[0] = tmp2.i[0] = tmp3.i[0] = x->i[0];
   tmp1.i[1] = tmp2.i[1] = tmp3.i[1] = x->i[1];
 
-  ROTR( &tmp1, 28 );
-  ROTR( &tmp2, 34 );
-  ROTR( &tmp3, 39 );
+  ROTR_32( &tmp1, 28 );
+  ROTR_32( &tmp2, 34 );
+  ROTR_32( &tmp3, 39 );
 
   return snor32_64( x, &tmp1, snor32_64( &tmp2, &tmp2, &tmp3 ) );
 }
 
-/* # define Sigma1(x)       (ROTR((x),14) ^ ROTR((x),18) ^ ROTR((x),41)) */
+/* # define Sigma1(x)       (ROTR((x),14) ^ ROTR((x),18) ^ ROTR((x),41))
+ *
+ *
+ *  Need to keep x, because x will contain the result
+ *
+ */
 
-SHA_LONG32 * Sigma1( SHA_LONG32 *x )
+SHA_LONG32 * Sigma1_32( SHA_LONG32 *x )
 {
   SHA_LONG32 tmp1, tmp2, tmp3;
 
   tmp1.i[0] = tmp2.i[0] = tmp3.i[0] = x->i[0];
   tmp1.i[1] = tmp2.i[1] = tmp3.i[1] = x->i[1];
 
-  ROTR( &tmp1, 14 );
-  ROTR( &tmp2, 18 );
-  ROTR( &tmp3, 41 );
+  ROTR_32( &tmp1, 14 );
+  ROTR_32( &tmp2, 18 );
+  ROTR_32( &tmp3, 41 );
 
   return snor32_64( x, &tmp1, snor32_64( &tmp2, &tmp2, &tmp3 ) );
 }
 
-/* # define sigma0(x)       (ROTR((x),1)  ^ ROTR((x),8)  ^ ((x)>>7)) */
+/* # define sigma0(x)       (ROTR((x),1)  ^ ROTR((x),8)  ^ ((x)>>7))
+ *
+ *
+ *  Need to keep x, because x will contain the result
+ *
+ */
 
-SHA_LONG32 * sigma0( SHA_LONG32 *x )
+SHA_LONG32 * sigma0_32( SHA_LONG32 *x )
 {
   SHA_LONG32 tmp1, tmp2, tmp3;
 
   tmp1.i[0] = tmp2.i[0] = tmp3.i[0] = x->i[0];
   tmp1.i[1] = tmp2.i[1] = tmp3.i[1] = x->i[1];
 
-  ROTR( &tmp1, 1 );
-  ROTR( &tmp2, 8 );
-  shift_left( &tmp3, 7 );
+  ROTR_32( &tmp1, 1 );
+  ROTR_32( &tmp2, 8 );
+  shift_right( &tmp3, 7 );
 
   return snor32_64( x, &tmp1, snor32_64( &tmp2, &tmp2, &tmp3 ) );
 }
 
-/* # define sigma1(x)       (ROTR((x),19) ^ ROTR((x),61) ^ ((x)>>6)) */
+/* # define sigma1(x)       (ROTR((x),19) ^ ROTR((x),61) ^ ((x)>>6))
+ *
+ *
+ *  Need to keep x, because x will contain the result
+ *
+ */
 
-SHA_LONG32 * sigma1( SHA_LONG32 *x )
+SHA_LONG32 * sigma1_32( SHA_LONG32 *x )
 {
   SHA_LONG32 tmp1, tmp2, tmp3;
 
   tmp1.i[0] = tmp2.i[0] = tmp3.i[0] = x->i[0];
   tmp1.i[1] = tmp2.i[1] = tmp3.i[1] = x->i[1];
 
-  ROTR( &tmp1, 19 );
-  ROTR( &tmp2, 61 );
-  shift_left( &tmp3, 6 );
+  ROTR_32( &tmp1, 19 );
+  ROTR_32( &tmp2, 61 );
+  shift_right( &tmp3, 6 );
 
   return snor32_64( x, &tmp1, snor32_64( &tmp2, &tmp2, &tmp3 ) );
 }
 
-/* # define Ch(x,y,z)       (((x) & (y)) ^ ((~(x)) & (z))) */
+/* # define Ch(x,y,z)       (((x) & (y)) ^ ((~(x)) & (z)))
+ *
+ *
+ *  Need to keep x, because x will contain the result
+ *
+ */
 
-SHA_LONG32 * Ch( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
+SHA_LONG32 * Ch_32( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
 {
   SHA_LONG32 tmpx1, tmpx2, tmpy, tmpz;
   
@@ -236,9 +266,14 @@ SHA_LONG32 * Ch( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
 
 
 
-/* # define Maj(x,y,z)      (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z))) */
+/* # define Maj(x,y,z)      (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+ *
+ *
+ *  Need to keep x, because x will contain the result
+ *
+ */
 
-SHA_LONG32 * Maj( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
+SHA_LONG32 * Maj_32( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
 {
   SHA_LONG32 tmpx1, tmpx2, tmpy, tmpz;
 
@@ -257,6 +292,364 @@ SHA_LONG32 * Maj( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
 
   return snor32_64( x, &tmpx1, snor32_64( &tmpx2, &tmpx2, &tmpy ) );
 }
+
+
+/*=======================================================*/
+/* It is a test all functions, which will replace define */
+
+#  define B(x,j)    (((SHA_LONG64)(*(((const unsigned char *)(&x))+j)))<<((7-j)*8))
+#  define PULL64(x) (B(x,0)|B(x,1)|B(x,2)|B(x,3)|B(x,4)|B(x,5)|B(x,6)|B(x,7))
+
+
+#  define ROTR(x,s)  (((x)>>s) | (x)<<(64-s))
+
+# define Sigma0(x)       (ROTR((x),28) ^ ROTR((x),34) ^ ROTR((x),39))
+# define Sigma1(x)       (ROTR((x),14) ^ ROTR((x),18) ^ ROTR((x),41))
+
+# define sigma0(x)       (ROTR((x),1)  ^ ROTR((x),8)  ^ ((x)>>7))
+# define sigma1(x)       (ROTR((x),19) ^ ROTR((x),61) ^ ((x)>>6))
+
+
+# define Ch(x,y,z)       (((x) & (y)) ^ ((~(x)) & (z)))
+# define Maj(x,y,z)      (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+
+
+
+
+void print_test_defines( )
+{
+    SHA_LONG64 In, Inx, Iny, Inz;
+    SHA_LONG32 in, inx, iny, inz;
+    SHA_LONG64 T;
+    SHA_LONG32 t;
+    SHA_LONG32 *pt;
+
+
+    printf("-> Test DEFINES and them FUNCTION to replace to...\n\n");
+
+/*
+ * #  define B(x,j)    (((SHA_LONG64)(*(((const unsigned char *)(&x))+j)))<<((7-j)*8))
+ *
+ * #  define PULL64(x) (B(x,0)|B(x,1)|B(x,2)|B(x,3)|B(x,4)|B(x,5)|B(x,6)|B(x,7))
+ */
+
+   In = in.l = 0x6a09e667f3bcc908;                             /* initialize value for the test */
+   
+   T = PULL64( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = PULL64_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function PULL64_32 vs define PULL64.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function PULL64_32 is'n OK.\n"); }
+
+   In = in.l = 0x0123456789abcdef;                             /* initialize value for the test */
+   
+   T = PULL64( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = PULL64_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function PULL64_32 vs define PULL64.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function PULL64_32 is'n OK.\n"); }
+
+   In = in.l = 0xfedcba9876543210;                             /* initialize value for the test */
+   
+   T = PULL64( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = PULL64_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function PULL64_32 vs define PULL64.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function PULL64_32 is'n OK.\n"); }
+
+/* # define Sigma0(x)       (ROTR((x),28) ^ ROTR((x),34) ^ ROTR((x),39))
+ *
+ *   SHA_LONG32 * Sigma0_32( SHA_LONG32 *x )
+ */
+
+   In = in.l = 0x6a09e667f3bcc908;                             /* initialize value for the test */
+   
+   T = Sigma0( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = Sigma0_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Sigma0_32 vs define Sigma0.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Sigma0_32 is'n OK.\n"); }
+
+   In = in.l = 0x0123456789abcdef;                             /* initialize value for the test */
+   
+   T = Sigma0( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = Sigma0_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Sigma0_32 vs define Sigma0.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Sigma0_32 is'n OK.\n"); }
+
+   In = in.l = 0xfedcba9876543210;                             /* initialize value for the test */
+   
+   T = Sigma0( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = Sigma0_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Sigma0_32 vs define Sigma0.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Sigma0_32 is'n OK.\n"); }
+
+
+/* # define Sigma1(x)       (ROTR((x),14) ^ ROTR((x),18) ^ ROTR((x),41))
+ *
+ * SHA_LONG32 * Sigma1_32( SHA_LONG32 *x )
+ */
+
+   In = in.l = 0x6a09e667f3bcc908;                             /* initialize value for the test */
+   
+   T = Sigma1( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = Sigma1_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Sigma1_32 vs define Sigma1.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Sigma1_32 is'n OK.\n"); }
+
+   In = in.l = 0x0123456789abcdef;                             /* initialize value for the test */
+   
+   T = Sigma1( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = Sigma1_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Sigma1_32 vs define Sigma1.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Sigma1_32 is'n OK.\n"); }
+
+   In = in.l = 0xfedcba9876543210;                             /* initialize value for the test */
+   
+   T = Sigma1( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = Sigma1_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Sigma1_32 vs define Sigma1.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Sigma1_32 is'n OK.\n"); }
+
+
+/* # define sigma0(x)       (ROTR((x),1)  ^ ROTR((x),8)  ^ ((x)>>7))
+ *
+ *  SHA_LONG32 * sigma0_32( SHA_LONG32 *x )
+ */
+
+   In = in.l = 0x6a09e667f3bcc908;                             /* initialize value for the test */
+   
+   T = sigma0( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = sigma0_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function sigma0_32 vs define sigma0.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function sigma0_32 is'n OK.\n"); }
+
+   In = in.l = 0x0123456789abcdef;                             /* initialize value for the test */
+   
+   T = sigma0( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = sigma0_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function sigma0_32 vs define sigma0.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function sigma0_32 is'n OK.\n"); }
+
+   In = in.l = 0xfedcba9876543210;                             /* initialize value for the test */
+   
+   T = sigma0( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = sigma0_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function sigma0_32 vs define sigma0.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function sigma0_32 is'n OK.\n"); }
+
+
+/* # define sigma1(x)       (ROTR((x),19) ^ ROTR((x),61) ^ ((x)>>6))
+ *
+ *  SHA_LONG32 * sigma1_32( SHA_LONG32 *x )
+ */
+
+   In = in.l = 0x6a09e667f3bcc908;                             /* initialize value for the test */
+   
+   T = sigma1( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = sigma1_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function sigma1_32 vs define sigma1.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function sigma1_32 is'n OK.\n"); }
+
+   In = in.l = 0x0123456789abcdef;                             /* initialize value for the test */
+   
+   T = sigma1( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = sigma1_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function sigma1_32 vs define sigma1.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function sigma1_32 is'n OK.\n"); }
+
+   In = in.l = 0xfedcba9876543210;                             /* initialize value for the test */
+   
+   T = sigma1( In );
+   t.i[0] = in.i[0];                                           /* need to save variable */
+   t.i[1] = in.i[1];
+   pt = sigma1_32( &t );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function sigma1_32 vs define sigma1.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function sigma1_32 is'n OK.\n"); }
+
+
+/* # define Ch(x,y,z)       (((x) & (y)) ^ ((~(x)) & (z)))
+ *
+ *  SHA_LONG32 * Ch_32( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
+ */
+
+   Inx = inx.l = 0x0123456789abcdef;
+   Iny = iny.l = 0xfedcba9876543210;
+   Inz = inz.l = 0xa5a5a5a5a5a5a5a5;
+
+   T = Ch( Inx, Iny, Inz );
+   t.i[0] = inx.i[0];                                          /* need to save variable */
+   t.i[1] = inx.i[1];
+   pt = Ch_32( &t, &iny, &inz );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Ch_32 vs define Ch.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Ch_32 is'n OK.\n"); }
+      
+
+/* # define Maj(x,y,z)      (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+ *
+ * SHA_LONG32 * Maj_32( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
+ *
+ */
+
+   Inx = inx.l = 0x5a5a5a5a5a5a5a5a;
+   Iny = iny.l = 0xfedcba9876543210;
+   Inz = inz.l = 0x1234567898765432;
+
+   T = Maj( Inx, Iny, Inz );
+   t.i[0] = inx.i[0];                                          /* need to save variable */
+   t.i[1] = inx.i[1];
+   pt = Maj_32( &t, &iny, &inz );
+
+   if( pt == &t )                                              /* check value of pointer */
+     {
+        printf("-> it's function Maj_32 vs define Maj.\n");
+        printf("[%016llX] == [%08X.%08X]\n", T, t.i[1], t.i[0]);
+        printf("[%016llX] == [%016llX]\n", T, t.l);
+     }
+   else
+     { printf("-> function Maj_32 is'n OK.\n"); }
+
+
+
+}     /* End of print_test_defines */
+
+
 
 
 /*
