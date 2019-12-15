@@ -15,3 +15,8 @@ REPORT
 3. I have found into the ../crypto/ec/curve448 is not a good implementation
    with header files:
 
+
+TEST
+
+To test new functions I will use md5.c and Makefile.md5 from sources FreeBSD release 11.3.
+This files is in the /usr/src/sbin/md5 directory.
