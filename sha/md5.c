@@ -51,10 +51,12 @@ static int checksFailed;
 
 typedef void (DIGEST_Init)(void *);
 typedef void (DIGEST_Update)(void *, const unsigned char *, size_t);
-typedef char *(DIGEST_Final)(void *, char *);
+typedef char *(DIGEST_End)(void *, char *);
 
-extern const char *SHA384_32TestOutput[MDTESTCOUNT];
-extern const char *SHA512_32TestOutput[MDTESTCOUNT];
+extern const char *SHA384_TestOutput[MDTESTCOUNT];
+extern const char *SHA512_TestOutput[MDTESTCOUNT];
+extern const char *SHA512t256_TestOutput[MDTESTCOUNT];
+/*------ 32 bit implementation the same as 64 bit ----------*/
 
 typedef struct Algorithm_t {
 	const char *progname;
@@ -62,10 +64,12 @@ typedef struct Algorithm_t {
 	const char *(*TestOutput)[MDTESTCOUNT];
 	DIGEST_Init *Init;
 	DIGEST_Update *Update;
-	DIGEST_Final *Final;
+	DIGEST_End *End;
 	char *(*Data)(const void *, unsigned int, char *);
 	char *(*File)(const char *, char *);
 } Algorithm_t;
+
+
 
 static void MDString(const Algorithm_t *, const char *);
 static void MDTimeTrial(const Algorithm_t *);
@@ -73,24 +77,37 @@ static void MDTestSuite(const Algorithm_t *);
 static void MDFilter(const Algorithm_t *, int);
 static void usage(const Algorithm_t *);
 
+extern char *SHA512_32End(SHA512_32CTX *, char *);
+extern char *SHA512_32Fd(int, char *);
+extern char *SHA512_32FdChunk(int, char *, off_t, off_t);
+extern char *SHA512_32File(const char *, char *);
+extern char *SHA512_32FileChunk(const char *, char *, off_t, off_t);
+extern char *SHA512_32Data (const void *, unsigned int, char *);
+
+
 typedef union {
 	SHA512_32CTX sha512;
 } DIGEST_CTX;
 
-/* max(MD5_DIGEST_LENGTH, SHA_DIGEST_LENGTH,
-	SHA256_DIGEST_LENGTH, SHA512_DIGEST_LENGTH,
-	RIPEMD160_DIGEST_LENGTH, SKEIN1024_DIGEST_LENGTH)*2+1 */
+/* max(SHA_DIGEST_LENGTH, SHA256_DIGEST_LENGTH, SHA512_DIGEST_LENGTH)*2+1 */
 
 #define HEX_DIGEST_LENGTH 257
 
 /* algorithm function table */
 
 static const struct Algorithm_t Algorithm[] = {
-	{ "sha384_32", "SHA384_32", &SHA384_32TestOutput, (DIGEST_Init*)&SHA384_32Init,
-		(DIGEST_Update*)&SHA384_32Update, (DIGEST_Final*)&SHA384_32Final,
+	{ "sha512", "SHA512", &SHA512_TestOutput, (DIGEST_Init*)&SHA512_Init,
+		(DIGEST_Update*)&SHA512_Update, (DIGEST_End*)&SHA512_End,
+		&SHA512_Data, &SHA512_File },
+	{ "sha384", "SHA384", &SHA384_TestOutput, (DIGEST_Init*)&SHA384_Init,
+		(DIGEST_Update*)&SHA384_Update, (DIGEST_End*)&SHA384_End,
+		&SHA384_Data, &SHA384_File },
+        /*------ 32 bit implementation ----------*/
+	{ "sha384_32", "SHA384_32", &SHA384_TestOutput, (DIGEST_Init*)&SHA384_32Init,
+		(DIGEST_Update*)&SHA384_32Update, (DIGEST_End*)&SHA384_32End,
 		&SHA384_32Data, &SHA384_32File },
-	{ "sha512_32", "SHA512_32", &SHA512_32TestOutput, (DIGEST_Init*)&SHA512_32Init,
-		(DIGEST_Update*)&SHA512_32Update, (DIGEST_Final*)&SHA512_32Final,
+	{ "sha512_32", "SHA512_32", &SHA512_TestOutput, (DIGEST_Init*)&SHA512_32Init,
+		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512_32End,
 		&SHA512_32Data, &SHA512_32File }
 };
 
@@ -98,6 +115,7 @@ static const struct Algorithm_t Algorithm[] = {
 /* Main driver.
 
 Arguments (may be any combination):
+  -h(?)    - usage
   -sstring - digests string
   -t       - runs time trial
   -x       - runs test script
@@ -130,13 +148,13 @@ main(int argc, char *argv[])
 	failed = 0;
 	checkAgainst = NULL;
 	checksFailed = 0;
-	while ((ch = getopt(argc, argv, "c:pqrs:tx")) != -1)
+	while ((ch = getopt(argc, argv, "?hc:pqrs:tx")) != -1)
 		switch (ch) {
 		case 'c':
 			checkAgainst = optarg;
 			break;
 		case 'p':
-/*			MDFilter(&Algorithm[digest], 1);  */
+			MDFilter(&Algorithm[digest], 1);
 			break;
 		case 'q':
 			qflag = 1;
@@ -146,20 +164,22 @@ main(int argc, char *argv[])
 			break;
 		case 's':
 			sflag = 1;
-/*			MDString(&Algorithm[digest], optarg); */
+			MDString(&Algorithm[digest], optarg);
 			break;
 		case 't':
-/*			MDTimeTrial(&Algorithm[digest]); */
+			MDTimeTrial(&Algorithm[digest]);
 			break;
 		case 'x':
-/*			MDTestSuite(&Algorithm[digest]); */
+			MDTestSuite(&Algorithm[digest]);
 			break;
+		case '?':
+                case 'h':
 		default:
 			usage(&Algorithm[digest]);
 		}
 	argc -= optind;
 	argv += optind;
-/*
+
 	if (*argv) {
 		do {
 			p = Algorithm[digest].File(*argv, buf);
@@ -185,7 +205,7 @@ main(int argc, char *argv[])
 		} while (*++argv);
 	} else if (!sflag && (optind == 1 || qflag || rflag))
 		MDFilter(&Algorithm[digest], 0);
-*/
+
 	if (failed != 0)
 		return (1);
 	if (checksFailed != 0)
@@ -250,8 +270,9 @@ MDTimeTrial(const Algorithm_t *alg)
 	/* Digest blocks */
 	alg->Init(&context);
 	for (i = 0; i < TEST_BLOCK_COUNT; i++)
-		alg->Update(&context, block, TEST_BLOCK_LEN);
-	p = alg->Final(&context, buf);
+		 alg->Update(&context, block, TEST_BLOCK_LEN);
+	p = alg->End(&context, buf);
+        p = buf;
 
 	/* Stop timer */
 	getrusage(RUSAGE_SELF, &after);
@@ -305,7 +326,7 @@ const char *SHA256_TestOutput[MDTESTCOUNT] = {
 	"e6eae09f10ad4122a0e2a4075761d185a272ebd9f5aa489e998ff2f09cbfdd9f"
 };
 
-const char *SHA384_32TestOutput[MDTESTCOUNT] = {
+const char *SHA384_TestOutput[MDTESTCOUNT] = {
 	"38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b",
 	"54a59b9f22b0b80880d8427e548b7c23abd873486e1f035dce9cd697e85175033caa88e6d57bc35efae0b5afd3145f31",
 	"cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7",
@@ -316,7 +337,7 @@ const char *SHA384_32TestOutput[MDTESTCOUNT] = {
 	"99428d401bf4abcd4ee0695248c9858b7503853acfae21a9cffa7855f46d1395ef38596fcd06d5a8c32d41a839cc5dfb"
 };
 
-const char *SHA512_32TestOutput[MDTESTCOUNT] = {
+const char *SHA512_TestOutput[MDTESTCOUNT] = {
 	"cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
 	"1f40fc92da241694750979ee6cf582f2d5d7d28e18335de05abc54d0560e0f5302860c652bf08d560252aa5e74210546f369fbbbce8c12cfc7957b2652fe9a75",
 	"ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f",
@@ -363,7 +384,7 @@ MDFilter(const Algorithm_t *alg, int tee)
 			err(1, "stdout");
 		alg->Update(&context, buffer, len);
 	}
-	printf("%s\n", alg->Final(&context, buf));
+	printf("%s\n", alg->End(&context, buf));
 }
 
 
@@ -371,6 +392,7 @@ static void
 usage(const Algorithm_t *alg)
 {
 
+	fprintf(stderr, "For help %s -h(?)\n", alg->progname);
 	fprintf(stderr, "usage: %s [-pqrtx] [-c string] [-s string] [files ...]\n", alg->progname);
 	exit(1);
 }

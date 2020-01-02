@@ -138,7 +138,19 @@ char *SHA512_Fd(int, char *);
 char *SHA512_FdChunk(int, char *, off_t, off_t);
 char *SHA512_File(const char *, char *);
 char *SHA512_FileChunk(const char *, char *, off_t, off_t);
-char *SHA512_Data (const void *, unsigned int, char *);
+char *SHA512_Data(const void *, unsigned int, char *);
+
+int SHA384_Init(SHA512_CTX *c);
+int SHA384_Update(SHA512_CTX *c, const void *data, size_t len);
+int SHA384_Final(unsigned char *md, SHA512_CTX *c);
+unsigned char *SHA384(const unsigned char *d, size_t n, unsigned char *md);
+
+char *SHA384_End(SHA512_CTX *, char *);
+char *SHA384_Fd(int, char *);
+char *SHA384_FdChunk(int, char *, off_t, off_t);
+char *SHA384_File(const char *, char *);
+char *SHA384_FileChunk(const char *, char *, off_t, off_t);
+char *SHA384_Data(const void *, unsigned int, char *);
 
 /* #else  32bit */
 
@@ -146,6 +158,14 @@ int SHA384_32Init(SHA512_32CTX *c);
 int SHA384_32Update(SHA512_32CTX *c, const void *data, size_t len);
 int SHA384_32Final(unsigned char *md, SHA512_32CTX *c);
 unsigned char *SHA384_32(const unsigned char *d, size_t n, unsigned char *md);
+
+char *SHA384_32End(SHA512_32CTX *, char *);
+char *SHA384_32Fd(int, char *);
+char *SHA384_32FdChunk(int, char *, off_t, off_t);
+char *SHA384_32File(const char *, char *);
+char *SHA384_32FileChunk(const char *, char *, off_t, off_t);
+char *SHA384_32Data(const void *, unsigned int, char *);
+
 
 int SHA512_32Init(SHA512_32CTX *c);
 int SHA512_32Update(SHA512_32CTX *c, const void *data, size_t len);
@@ -158,7 +178,7 @@ char *SHA512_32Fd(int, char *);
 char *SHA512_32FdChunk(int, char *, off_t, off_t);
 char *SHA512_32File(const char *, char *);
 char *SHA512_32FileChunk(const char *, char *, off_t, off_t);
-char *SHA512_32Data (const void *, unsigned int, char *);
+char *SHA512_32Data(const void *, unsigned int, char *);
 
 
 /* #endif 32bit */
