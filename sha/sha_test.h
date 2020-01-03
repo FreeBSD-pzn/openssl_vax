@@ -75,7 +75,7 @@ void SHA256_Transform(SHA256_CTX *c, const unsigned char *data);
  * 32-bit digest algorithms for the SHA-512 see sha512_32.c
 */
 
-typedef union {           /* # define SHA_LONG32 unsigned int */
+typedef union {           /* # SHA_LONG32 has been written to test */
    unsigned int  i[2];
    unsigned long long l;
    } SHA_LONG32;
@@ -167,11 +167,15 @@ char *SHA384_32FileChunk(const char *, char *, off_t, off_t);
 char *SHA384_32Data(const void *, unsigned int, char *);
 
 
-int SHA512_32Init(SHA512_32CTX *c);
-int SHA512_32Update(SHA512_32CTX *c, const void *data, size_t len);
-int SHA512_32Final(unsigned char *md, SHA512_32CTX *c);
-unsigned char *SHA512_32(const unsigned char *d, size_t n, unsigned char *md);
-void SHA512_32Transform(SHA512_32CTX *c, const unsigned char *data);
+int SHA512_32Init(SHA512_32CTX *);
+int SHA512_224_32Init(SHA512_32CTX *);
+int SHA512_256_32Init(SHA512_32CTX *);
+int SHA512_32Update(SHA512_32CTX *, const void *, size_t );
+int SHA512_32Final(unsigned char *, SHA512_32CTX *);
+unsigned char *SHA512t256_32(const unsigned char *, size_t, unsigned char * );
+unsigned char *SHA512_32(const unsigned char *, size_t, unsigned char * );
+
+void SHA512_32Transform(SHA512_32CTX *, const unsigned char * );
 
 char *SHA512_32End(SHA512_32CTX *, char *);
 char *SHA512_32Fd(int, char *);
@@ -179,6 +183,20 @@ char *SHA512_32FdChunk(int, char *, off_t, off_t);
 char *SHA512_32File(const char *, char *);
 char *SHA512_32FileChunk(const char *, char *, off_t, off_t);
 char *SHA512_32Data(const void *, unsigned int, char *);
+
+char *SHA512t256_32End(SHA512_32CTX *, char *);
+char *SHA512t256_32Fd(int, char *);
+char *SHA512t256_32FdChunk(int, char *, off_t, off_t);
+char *SHA512t256_32File(const char *, char *);
+char *SHA512t256_32FileChunk(const char *, char *, off_t, off_t);
+char *SHA512t256_32Data(const void *, unsigned int, char *);
+
+char *SHA512t224_32End(SHA512_32CTX *, char *);
+char *SHA512t224_32Fd(int, char *);
+char *SHA512t224_32FdChunk(int, char *, off_t, off_t);
+char *SHA512t224_32File(const char *, char *);
+char *SHA512t224_32FileChunk(const char *, char *, off_t, off_t);
+char *SHA512t224_32Data(const void *, unsigned int, char *);
 
 
 /* #endif 32bit */
