@@ -34,7 +34,7 @@
 /*
  *
  */
-#include "sha_test.h"
+#include "sha512_32.h"
 
 /*
  * Length of test block, number of test blocks.

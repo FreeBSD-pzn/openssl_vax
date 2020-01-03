@@ -8,7 +8,7 @@ LINK := cc
 LFLAGS :=
 LIBS :=
 
-SHA_TEST := mem_clr.o sha512_32.o sha512_32hl.o  sha512.o sha512hl.o sha384_32hl.o sha_test.o
+#SHA_TEST := mem_clr.o sha512_32.o sha512_32hl.o  sha512.o sha512hl.o sha384_32hl.o sha_test.o
 
 SHA512 := mem_clr.o sha512.o sha512hl.o sha512_32.o sha512_32hl.o sha384hl.o \
 		sha384_32hl.o sha512t256_32hl.o sha512t224_32hl.o md5.o
@@ -30,12 +30,12 @@ SHA384_32 := mem_clr.o sha512.o sha512hl.o sha512_32.o sha512_32hl.o sha384hl.o 
 
 CLEARFILES := *.o sha512hl.c sha512_32hl.c sha384hl.c sha384_32hl.c \
 		sha512t256_32hl.c sha512t224_32hl.c \
-		sha_test sha512 sha512_32 sha384 sha384_32 sha512t256_32 sha512t224_32
+		sha512 sha512_32 sha384 sha384_32 sha512t256_32 sha512t224_32
 
 .c.o:
 	$(CC) $(CFLAGS) $*.c
 
-all: sha_test sha512 sha512_32 sha512t256_32 sha512t224_32 sha384_32 sha384
+all: sha512 sha512_32 sha512t256_32 sha512t224_32 sha384_32 sha384
 
 sha512: $(SHA512)
 	$(LINK) -o sha512 $(SHA512)
@@ -55,8 +55,8 @@ sha384: $(SHA384)
 sha384_32: $(SHA384_32)
 	$(LINK) -o sha384_32 $(SHA384_32)
 
-sha_test: $(SHA_TEST)
-	$(LINK) -o sha_test $(SHA_TEST)
+#sha_test: $(SHA_TEST)
+#	$(LINK) -o sha_test $(SHA_TEST)
 
 clean:
 	rm $(CLEARFILES)
@@ -104,12 +104,12 @@ sha512t224_32hl.c: mdXhl.c
 
 
 #
-sha_test.o: sha_test.h sha512.c sha512_32.c sha_test.c mem_clr.c
-sha512.o: sha512.c sha_test.h
-sha512_32.o: sha512_32.c sha_test.h
-sha384hl.o: sha384hl.c sha_test.h
-sha384_32hl.o: sha384_32hl.c sha_test.h
-sha512t256_32hl.o: sha512t256_32hl.c sha_test.h
-sha512t224_32hl.o: sha512t224_32hl.c sha_test.h
+#sha_test.o: sha_test.h sha512.c sha512_32.c sha_test.c mem_clr.c
+sha512.o: sha512.c sha512_32.h
+sha512_32.o: sha512_32.c sha512_32.h
+sha384hl.o: sha384hl.c sha512_32.h
+sha384_32hl.o: sha384_32hl.c sha512_32.h
+sha512t256_32hl.o: sha512t256_32hl.c sha512_32.h
+sha512t224_32hl.o: sha512t224_32hl.c sha512_32.h
 mem_clr.o: mem_clr.c
 #---------------------------------------------------------------

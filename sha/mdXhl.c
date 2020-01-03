@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sha_test.h"
+#include "sha512_32.h"
 
 char *
 MDXEnd(MDX_CTX *ctx, char *buf)

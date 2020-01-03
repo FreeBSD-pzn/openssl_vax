@@ -56,8 +56,7 @@
 
 
 /* ============================================= */
-#include "sha_test.h"
-#include <stdio.h>
+#include "sha512_32.h"
 /* ============================================= */
 
 
@@ -393,7 +392,6 @@ int SHA512_256_32Init(SHA512_32CTX *c)
     c->Nh.i[1] = c->Nh.i[0] = 0;
     c->num = 0;
     c->md_len = SHA256_DIGEST_LENGTH;
-    printf("Digest 512_256_32\n");
     return 1;
 }
 
