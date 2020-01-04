@@ -981,7 +981,6 @@ SHA_LONG32 * Maj_32( SHA_LONG32 *x, SHA_LONG32 *y, SHA_LONG32 *z )
 }
 
 
-
 /*
  * This code should give better results on 32-bit CPU with less than
  * ~24 registers, both size and performance wise...

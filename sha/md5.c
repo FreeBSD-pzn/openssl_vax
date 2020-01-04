@@ -103,7 +103,21 @@ static const struct Algorithm_t Algorithm[] = {
 	{ "sha384", "SHA384", &SHA384_TestOutput, (DIGEST_Init*)&SHA384_Init,
 		(DIGEST_Update*)&SHA384_Update, (DIGEST_End*)&SHA384_End,
 		&SHA384_Data, &SHA384_File },
+	{ "sha512t224", "SHA512t224", &SHA512t224_TestOutput,
+		(DIGEST_Init*)&SHA512_224_Init,
+		(DIGEST_Update*)&SHA512_Update, (DIGEST_End*)&SHA512t224_End,
+		&SHA512t224_Data, &SHA512t224_File },
+	{ "sha512t256", "SHA512t256", &SHA512t256_TestOutput,
+		(DIGEST_Init*)&SHA512_256_Init,
+		(DIGEST_Update*)&SHA512_Update, (DIGEST_End*)&SHA512t256_End,
+		&SHA512t256_Data, &SHA512t256_File },
         /*------ 32 bit implementation ----------*/
+	{ "sha384_32", "SHA384_32", &SHA384_TestOutput, (DIGEST_Init*)&SHA384_32Init,
+		(DIGEST_Update*)&SHA384_32Update, (DIGEST_End*)&SHA384_32End,
+		&SHA384_32Data, &SHA384_32File },
+	{ "sha512_32", "SHA512_32", &SHA512_TestOutput, (DIGEST_Init*)&SHA512_32Init,
+		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512_32End,
+		&SHA512_32Data, &SHA512_32File },
 	{ "sha512t224_32", "SHA512t224_32", &SHA512t224_TestOutput,
 		(DIGEST_Init*)&SHA512_224_32Init,
 		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512t224_32End,
@@ -111,13 +125,7 @@ static const struct Algorithm_t Algorithm[] = {
 	{ "sha512t256_32", "SHA512t256_32", &SHA512t256_TestOutput,
 		(DIGEST_Init*)&SHA512_256_32Init,
 		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512t256_32End,
-		&SHA512t256_32Data, &SHA512t256_32File },
-	{ "sha384_32", "SHA384_32", &SHA384_TestOutput, (DIGEST_Init*)&SHA384_32Init,
-		(DIGEST_Update*)&SHA384_32Update, (DIGEST_End*)&SHA384_32End,
-		&SHA384_32Data, &SHA384_32File },
-	{ "sha512_32", "SHA512_32", &SHA512_TestOutput, (DIGEST_Init*)&SHA512_32Init,
-		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512_32End,
-		&SHA512_32Data, &SHA512_32File }
+		&SHA512t256_32Data, &SHA512t256_32File }
 };
 
 
@@ -396,7 +404,7 @@ MDTestSuite(const Algorithm_t *alg)
 	printf("%s test suite:\n", alg->name);
 	for (i = 0; i < MDTESTCOUNT; i++) {
 		(*alg->Data)(MDTestInput[i], strlen(MDTestInput[i]), buffer);
-		printf("%s (\"%s\") = %s", alg->name, MDTestInput[i], buffer);
+		printf("%s \n\t(\"%s\") => \n\t%s", alg->name, MDTestInput[i], buffer);
 		if (strcmp(buffer, (*alg->TestOutput)[i]) == 0)
 			printf(" - verified correct\n");
 		else

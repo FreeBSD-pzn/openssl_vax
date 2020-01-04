@@ -19,4 +19,13 @@ REPORT
 TEST
 
 To test new functions I will use md5.c and Makefile.md5 from sources FreeBSD release 11.3.
-This files is in the /usr/src/sbin/md5 directory.
+This files are in the /usr/src/sbin/md5 directory.
+To create _End(), _Data() and _File() functions I will use mdXhl.c from sources FreeBSD release 11.3.
+This file is in the /usr/src/lib/libmd directory.
+
+RESUME
+
+The first release of 32 bit implementation SHA is ready.
+After compile you will get:
+sha512, sha384, sha512t256, sha512t224 - programs which based on a 64 bit implementation;
+sha512_32, sha384_32, sha512t256_32, sha512t224_32 - programs which based on a 32 bit implementation.

@@ -69,7 +69,7 @@
 # define SHA512_BLOCK_CAN_MANAGE_UNALIGNED_DATA
 #endif
 
-int sha512_224_init(SHA512_CTX *c)
+int SHA512_224_Init(SHA512_CTX *c)
 {
     c->h[0] = 0x8c3d37c819544da2;
     c->h[1] = 0x73e1996689dcd4d6;
@@ -87,7 +87,7 @@ int sha512_224_init(SHA512_CTX *c)
     return 1;
 }
 
-int sha512_256_init(SHA512_CTX *c)
+int SHA512_256_Init(SHA512_CTX *c)
 {
     c->h[0] = 0x22312194fc2bf72c;
     c->h[1] = 0x9f555fa3c84c64c2;

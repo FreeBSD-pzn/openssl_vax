@@ -75,9 +75,9 @@ void SHA256_Transform(SHA256_CTX *c, const unsigned char *data);
  * 32-bit digest algorithms for the SHA-512 see sha512_32.c
 */
 
-typedef union {           /* # SHA_LONG32 has been written to test */
+typedef union {           /* # SHA_LONG32 has been written to the 32 bit */
    unsigned int  i[2];
-   unsigned long long l;
+   unsigned long l;       /* remove long long -> long to compile on VAX  */
    } SHA_LONG32;
 
 # define SHA512_LBLOCK (SHA_LBLOCK*2)
@@ -85,7 +85,7 @@ typedef union {           /* # SHA_LONG32 has been written to test */
 
 /*
  * To check 32 bit create union
- * after check delete 64 bit long 
+ * after check delete 64 bit long long
  */
 
 typedef struct SHA512_32state_st {
@@ -122,16 +122,20 @@ typedef struct SHA512state_st {
 
 /* #ifndef 32bit */
 
-int SHA384_Init(SHA512_CTX *c);
-int SHA384_Update(SHA512_CTX *c, const void *data, size_t len);
-int SHA384_Final(unsigned char *md, SHA512_CTX *c);
-unsigned char *SHA384(const unsigned char *d, size_t n, unsigned char *md);
+int SHA384_Init(SHA512_CTX *);
+int SHA384_Update(SHA512_CTX *, const void *, size_t );
+int SHA384_Final(unsigned char *, SHA512_CTX * );
+unsigned char *SHA384(const unsigned char *, size_t, unsigned char * );
 
-int SHA512_Init(SHA512_CTX *c);
-int SHA512_Update(SHA512_CTX *c, const void *data, size_t len);
-int SHA512_Final(unsigned char *md, SHA512_CTX *c);
-unsigned char *SHA512(const unsigned char *d, size_t n, unsigned char *md);
-void SHA512_Transform(SHA512_CTX *c, const unsigned char *data);
+int SHA512_Init(SHA512_CTX *);
+int SHA512_Update(SHA512_CTX *, const void *, size_t );
+int SHA512_Final(unsigned char *, SHA512_CTX * );
+unsigned char *SHA512(const unsigned char *, size_t, unsigned char * );
+void SHA512_Transform(SHA512_CTX *, const unsigned char * );
+
+int SHA512_256_Init(SHA512_CTX * );
+int SHA512_224_Init(SHA512_CTX * );
+
 
 char *SHA512_End(SHA512_CTX *, char *);
 char *SHA512_Fd(int, char *);
@@ -139,6 +143,20 @@ char *SHA512_FdChunk(int, char *, off_t, off_t);
 char *SHA512_File(const char *, char *);
 char *SHA512_FileChunk(const char *, char *, off_t, off_t);
 char *SHA512_Data(const void *, unsigned int, char *);
+
+char *SHA512t256_End(SHA512_CTX *, char *);
+char *SHA512t256_Fd(int, char *);
+char *SHA512t256_FdChunk(int, char *, off_t, off_t);
+char *SHA512t256_File(const char *, char *);
+char *SHA512t256_FileChunk(const char *, char *, off_t, off_t);
+char *SHA512t256_Data(const void *, unsigned int, char *);
+
+char *SHA512t224_End(SHA512_CTX *, char *);
+char *SHA512t224_Fd(int, char *);
+char *SHA512t224_FdChunk(int, char *, off_t, off_t);
+char *SHA512t224_File(const char *, char *);
+char *SHA512t224_FileChunk(const char *, char *, off_t, off_t);
+char *SHA512t224_Data(const void *, unsigned int, char *);
 
 int SHA384_Init(SHA512_CTX *c);
 int SHA384_Update(SHA512_CTX *c, const void *data, size_t len);
