@@ -154,6 +154,7 @@ main(int argc, char *argv[])
 	char	buf[HEX_DIGEST_LENGTH];
 	int	failed;
  	unsigned	digest;
+        int     len;
         /* move variable progname to the global        
  	const char*	progname;
         */
@@ -176,10 +177,17 @@ main(int argc, char *argv[])
          * strcasecmp() has been replaced on a
          * strncasecmp().
          */
-
+        /* To get a N in the strncasecmp()
+         * find a position ".exe" in the progname
+         */
+        len = strlen( progname );
+        p   = strstr( progname, ".exe" );
+        if( p )  len -= strlen( p );
+        p   = strstr( progname, ".EXE" );
+        if( p )  len -= strlen( p );
+        
  	for (digest = 0; digest < sizeof(Algorithm)/sizeof(*Algorithm); digest++)
- 		if ( strncasecmp( Algorithm[digest].progname, progname,
-                    strlen(progname) ) == 0)
+ 		if ( strncasecmp( Algorithm[digest].progname, progname, len ) == 0)
  			break;
 
  	if (digest == sizeof(Algorithm)/sizeof(*Algorithm))
