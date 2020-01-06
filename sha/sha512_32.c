@@ -887,7 +887,7 @@ SHA_LONG32 * Sigma1_32( SHA_LONG32 *x )
  *
  */
 
-SHA_LONG32 * sigma0_32( SHA_LONG32 *x )
+SHA_LONG32 * sigma_0_32( SHA_LONG32 *x )
 {
   SHA_LONG32 tmp1, tmp2, tmp3;
 
@@ -908,7 +908,7 @@ SHA_LONG32 * sigma0_32( SHA_LONG32 *x )
  *
  */
 
-SHA_LONG32 * sigma1_32( SHA_LONG32 *x )
+SHA_LONG32 * sigma_1_32( SHA_LONG32 *x )
 {
   SHA_LONG32 tmp1, tmp2, tmp3;
 
@@ -1070,13 +1070,13 @@ static void sha512_32block_data_order(SHA512_32CTX *ctx, const void *in, size_t 
 
             tmp.i[0] = F[8 + 16 - 1].i[0];  /*  T = sigma0(F[8 + 16 - 1]);   */
             tmp.i[1] = F[8 + 16 - 1].i[1];
-            pt = sigma0_32( &tmp );
+            pt = sigma_0_32( &tmp );
             T.i[0] = tmp.i[0];
             T.i[1] = tmp.i[1];
 
             tmp.i[0] = F[8 + 16 - 14].i[0];  /*  T += sigma1(F[8 + 16 - 14]); */
             tmp.i[1] = F[8 + 16 - 14].i[1];
-            pt = sigma1_32( &tmp );
+            pt = sigma_1_32( &tmp );
             add_uu( &T, &tmp );
 
 

@@ -16,31 +16,36 @@
  *  These notices must be retained in any copies of any part of this
  *  documentation and/or software.
  */
-
-#include <sys/cdefs.h>
+#include "config.h"
 
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#include <err.h>
+
+#ifndef OpenVMS
+#include <sys/cdefs.h>
 #include <ripemd.h>
 #include <skein.h>
+#include "sha512.h"
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-
+#include <errno.h>
 /*
  *
  */
+
 #include "sha512_32.h"
 
 /*
  * Length of test block, number of test blocks.
  */
 #define TEST_BLOCK_LEN 10000
-#define TEST_BLOCK_COUNT 100000
+#define TEST_BLOCK_COUNT 1000
 #define MDTESTCOUNT 9
 
 static int qflag;
@@ -48,6 +53,12 @@ static int rflag;
 static int sflag;
 static char* checkAgainst;
 static int checksFailed;
+/*
+ * To remove err.h and replace err() and warn()
+ * functions variable progname has been
+ * declare as a global variable.
+ */
+const char *progname;
 
 typedef void (DIGEST_Init)(void *);
 typedef void (DIGEST_Update)(void *, const unsigned char *, size_t);
@@ -78,13 +89,6 @@ static void MDTestSuite(const Algorithm_t *);
 static void MDFilter(const Algorithm_t *, int);
 static void usage(const Algorithm_t *);
 
-extern char *SHA512_32End(SHA512_32CTX *, char *);
-extern char *SHA512_32Fd(int, char *);
-extern char *SHA512_32FdChunk(int, char *, off_t, off_t);
-extern char *SHA512_32File(const char *, char *);
-extern char *SHA512_32FileChunk(const char *, char *, off_t, off_t);
-extern char *SHA512_32Data (const void *, unsigned int, char *);
-
 
 typedef union {
 	SHA512_32CTX sha512;
@@ -97,6 +101,7 @@ typedef union {
 /* algorithm function table */
 
 static const struct Algorithm_t Algorithm[] = {
+#ifndef THIRTY_TWO_BIT
 	{ "sha512", "SHA512", &SHA512_TestOutput, (DIGEST_Init*)&SHA512_Init,
 		(DIGEST_Update*)&SHA512_Update, (DIGEST_End*)&SHA512_End,
 		&SHA512_Data, &SHA512_File },
@@ -111,6 +116,7 @@ static const struct Algorithm_t Algorithm[] = {
 		(DIGEST_Init*)&SHA512_256_Init,
 		(DIGEST_Update*)&SHA512_Update, (DIGEST_End*)&SHA512t256_End,
 		&SHA512t256_Data, &SHA512t256_File },
+#endif
         /*------ 32 bit implementation ----------*/
 	{ "sha384_32", "SHA384_32", &SHA384_TestOutput, (DIGEST_Init*)&SHA384_32Init,
 		(DIGEST_Update*)&SHA384_32Update, (DIGEST_End*)&SHA384_32End,
@@ -118,11 +124,11 @@ static const struct Algorithm_t Algorithm[] = {
 	{ "sha512_32", "SHA512_32", &SHA512_TestOutput, (DIGEST_Init*)&SHA512_32Init,
 		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512_32End,
 		&SHA512_32Data, &SHA512_32File },
-	{ "sha512t224_32", "SHA512t224_32", &SHA512t224_TestOutput,
+	{ "sha512t224_32", "SHA512T224_32", &SHA512t224_TestOutput,
 		(DIGEST_Init*)&SHA512_224_32Init,
 		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512t224_32End,
 		&SHA512t224_32Data, &SHA512t224_32File },
-	{ "sha512t256_32", "SHA512t256_32", &SHA512t256_TestOutput,
+	{ "sha512t256_32", "SHA512T256_32", &SHA512t256_TestOutput,
 		(DIGEST_Init*)&SHA512_256_32Init,
 		(DIGEST_Update*)&SHA512_32Update, (DIGEST_End*)&SHA512t256_32End,
 		&SHA512t256_32Data, &SHA512t256_32File }
@@ -132,12 +138,12 @@ static const struct Algorithm_t Algorithm[] = {
 /* Main driver.
 
 Arguments (may be any combination):
-  -h(?)    - usage
-  -sstring - digests string
-  -t       - runs time trial
-  -x       - runs test script
-  filename - digests file
-  (none)   - digests standard input
+  -h(?)     - usage
+  -s string - digests string
+  -t        - runs time trial
+  -x        - runs test script
+  filename  - digests file
+  (none)    - digests standard input
  */
 
 int
@@ -148,15 +154,32 @@ main(int argc, char *argv[])
 	char	buf[HEX_DIGEST_LENGTH];
 	int	failed;
  	unsigned	digest;
+        /* move variable progname to the global        
  	const char*	progname;
+        */
+#ifdef OpenVMS
+        char   cmp = ']';
+#else
+        char   cmp = '/';
+#endif
 
- 	if ((progname = strrchr(argv[0], '/')) == NULL)
+ 	if ((progname = strrchr(argv[0], cmp )) == NULL)
  		progname = argv[0];
  	else
  		progname++;
 
+        /* Executable file in the OpenVMS has extention - .EXE;n,
+         * in *NIXes operating systems executable file might
+         * without .exe extention.
+         * Windows operating system also has .EXE extention,
+         * so, to choice Algorithm 
+         * strcasecmp() has been replaced on a
+         * strncasecmp().
+         */
+
  	for (digest = 0; digest < sizeof(Algorithm)/sizeof(*Algorithm); digest++)
- 		if (strcasecmp(Algorithm[digest].progname, progname) == 0)
+ 		if ( strncasecmp( Algorithm[digest].progname, progname,
+                    strlen(progname) ) == 0)
  			break;
 
  	if (digest == sizeof(Algorithm)/sizeof(*Algorithm))
@@ -201,7 +224,15 @@ main(int argc, char *argv[])
 		do {
 			p = Algorithm[digest].File(*argv, buf);
 			if (!p) {
-				warn("%s", *argv);
+				/* warn("%s", *argv);
+                                 * replace on a frintf(stderr, ...)
+                                 * to exclude err.h
+                                 * 
+                                 * print: name of program, argv
+                                 * and number of error
+                                 */
+                                fprintf( stderr, "%s: %s. Error: [%d]\n",
+                                         progname, *argv, errno );
 				failed++;
 			} else {
 				if (qflag)
@@ -245,9 +276,9 @@ MDString(const Algorithm_t *alg, const char *string)
 	if (qflag)
 		printf("%s", buf);
 	else if (rflag)
-		printf("%s \"%s\"", buf, string);
+		printf("%s\n\"%s\"", buf, string);
 	else
-		printf("%s (\"%s\") = %s", alg->name, string, buf);
+		printf("%s (\"%s\") =\n%s", alg->name, string, buf);
 	if (checkAgainst && strcasecmp(buf,checkAgainst) != 0)
 	{
 		checksFailed++;
@@ -266,7 +297,9 @@ static void
 MDTimeTrial(const Algorithm_t *alg)
 {
 	DIGEST_CTX context;
+#ifndef OpenVMS
 	struct rusage before, after;
+#endif
 	struct timeval total;
 	float seconds;
 	unsigned char block[TEST_BLOCK_LEN];
@@ -282,7 +315,7 @@ MDTimeTrial(const Algorithm_t *alg)
 		block[i] = (unsigned char) (i & 0xff);
 
 	/* Start timer */
-	getrusage(RUSAGE_SELF, &before);
+/*	getrusage(RUSAGE_SELF, &before);   */
 
 	/* Digest blocks */
 	alg->Init(&context);
@@ -292,16 +325,19 @@ MDTimeTrial(const Algorithm_t *alg)
         p = buf;
 
 	/* Stop timer */
-	getrusage(RUSAGE_SELF, &after);
+/*	getrusage(RUSAGE_SELF, &after);
 	timersub(&after.ru_utime, &before.ru_utime, &total);
 	seconds = total.tv_sec + (float) total.tv_usec / 1000000;
-
+*/
 	printf(" done\n");
 	printf("Digest = %s", p);
+/*
 	printf("\nTime = %f seconds\n", seconds);
 	printf("Speed = %f MiB/second\n", (float) TEST_BLOCK_LEN * 
 		(float) TEST_BLOCK_COUNT / seconds / (1 << 20));
+*/
 }
+
 
 
 /*
@@ -404,11 +440,11 @@ MDTestSuite(const Algorithm_t *alg)
 	printf("%s test suite:\n", alg->name);
 	for (i = 0; i < MDTESTCOUNT; i++) {
 		(*alg->Data)(MDTestInput[i], strlen(MDTestInput[i]), buffer);
-		printf("%s \n\t(\"%s\") => \n\t%s", alg->name, MDTestInput[i], buffer);
+		printf("%s\n\t(\"%s\") =>\n\t%s", alg->name, MDTestInput[i], buffer);
 		if (strcmp(buffer, (*alg->TestOutput)[i]) == 0)
-			printf(" - verified correct\n");
+			printf("\n - verified correct\n");
 		else
-			printf(" - INCORRECT RESULT!\n");
+			printf("\n - INCORRECT RESULT!\n");
 	}
 }
 
@@ -427,7 +463,19 @@ MDFilter(const Algorithm_t *alg, int tee)
 	alg->Init(&context);
 	while ((len = fread(buffer, 1, BUFSIZ, stdin))) {
 		if (tee && len != fwrite(buffer, 1, len, stdout))
+                    {
+                       /*
+                        * Replace err() on a frintf(stderr,...)
+                        * function to remove err.h
 			err(1, "stdout");
+                        *
+                        * print: name of program, number of error
+                        * and exit with 1.
+                        */
+                        fprintf( stderr, "%s: stdout. Error: %d\n",
+                                 progname, errno );
+                        exit(1);
+                    }
 		alg->Update(&context, buffer, len);
 	}
 	printf("%s\n", alg->End(&context, buf));

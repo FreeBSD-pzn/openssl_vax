@@ -6,9 +6,9 @@
  * this stuff is worth it, you can buy me a beer in return.   Poul-Henning Kamp
  * ----------------------------------------------------------------------------
  */
-
+#ifndef OpenVMS
 #include <sys/cdefs.h>
-
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -17,8 +17,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "sha512_32.h"
 
 char *
 MDXEnd(MDX_CTX *ctx, char *buf)
