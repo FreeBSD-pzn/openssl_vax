@@ -45,7 +45,11 @@
  * Length of test block, number of test blocks.
  */
 #define TEST_BLOCK_LEN 10000
+#ifdef OpenVMS
 #define TEST_BLOCK_COUNT 1000
+#else
+#define TEST_BLOCK_COUNT 10000
+#endif
 #define MDTESTCOUNT 9
 
 static int qflag;
@@ -301,15 +305,33 @@ MDString(const Algorithm_t *alg, const char *string)
 /*
  * Measures the time to digest TEST_BLOCK_COUNT TEST_BLOCK_LEN-byte blocks.
  */
+#ifdef OpenVMS
+/*-----------------------------
+ * VMS dependent HEADER files
+ *-----------------------------*/
+#include <descrip.h>           /* Defined data types in DECC      */
+#include <SMG$ROUTINES.H>      /* Defined function SMG            */
+#include <SMGDEF.H>            /* Defined data types & keyboard   */
+#include <SMGMSG.H>            /* Defined messages from functions */
+#include <SSDEF.H>             /* Defined messages SS$_xx         */
+#include <LIBDEF.H>            /* Defined messages LIB$_xx        */
+#include <LIB$ROUTINES.H>      /* Defined lib$ routines           */
+#endif
+
 static void
 MDTimeTrial(const Algorithm_t *alg)
 {
 	DIGEST_CTX context;
+#ifdef  OpenVMS
+        unsigned long status;
+        unsigned long stime, cputime;
+        long          code=2;
+#endif
 #ifndef OpenVMS
 	struct rusage before, after;
 #endif
 	struct timeval total;
-	float seconds;
+	float speed, seconds;
 	unsigned char block[TEST_BLOCK_LEN];
 	unsigned int i;
 	char *p, buf[HEX_DIGEST_LENGTH];
@@ -323,7 +345,12 @@ MDTimeTrial(const Algorithm_t *alg)
 		block[i] = (unsigned char) (i & 0xff);
 
 	/* Start timer */
-/*	getrusage(RUSAGE_SELF, &before);   */
+#ifdef  OpenVMS
+        status = lib$init_timer( &stime );
+#endif
+#ifndef OpenVMS
+	getrusage(RUSAGE_SELF, &before);
+#endif
 
 	/* Digest blocks */
 	alg->Init(&context);
@@ -333,18 +360,29 @@ MDTimeTrial(const Algorithm_t *alg)
         p = buf;
 
 	/* Stop timer */
-/*	getrusage(RUSAGE_SELF, &after);
+#ifdef  OpenVMS
+        status = lib$stat_timer( &code, &cputime, &stime );
+        seconds = (float) cputime;
+        seconds /=100;
+#endif
+#ifndef OpenVMS
+	getrusage(RUSAGE_SELF, &after);
 	timersub(&after.ru_utime, &before.ru_utime, &total);
 	seconds = total.tv_sec + (float) total.tv_usec / 1000000;
-*/
+#endif
 	printf(" done\n");
-	printf("Digest = %s", p);
-/*
+	printf("Digest = %s\n", p);
 	printf("\nTime = %f seconds\n", seconds);
-	printf("Speed = %f MiB/second\n", (float) TEST_BLOCK_LEN * 
-		(float) TEST_BLOCK_COUNT / seconds / (1 << 20));
-*/
-}
+        if( seconds != 0 )
+          {
+            speed = (float) TEST_BLOCK_LEN * (float) TEST_BLOCK_COUNT / seconds;
+            if( speed > 1000000 )   
+               printf("Speed = %f MiB/second\n", speed / (1 << 20));
+            else
+               printf("Speed = %f KiB/second\n", speed / (1 << 10));
+          }
+
+}    /* End of MDTimeTrial() */
 
 
 
