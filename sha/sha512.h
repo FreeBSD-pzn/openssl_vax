@@ -45,6 +45,13 @@ int SHA1_Final(unsigned char *md, SHA_CTX *c);
 unsigned char *SHA1(const unsigned char *d, size_t n, unsigned char *md);
 void SHA1_Transform(SHA_CTX *c, const unsigned char *data);
 
+char *SHA1_End(SHA_CTX *, char *);
+char *SHA1_Fd(int, char *);
+char *SHA1_FdChunk(int, char *, off_t, off_t);
+char *SHA1_File(const char *, char *);
+char *SHA1_FileChunk(const char *, char *, off_t, off_t);
+char *SHA1_Data(const void *, unsigned int, char *);
+
 # define SHA256_CBLOCK   (SHA_LBLOCK*4)/* SHA-256 treats input data as a
                                         * contiguous array of 32 bit wide
                                         * big-endian values. */
@@ -60,11 +67,26 @@ int SHA224_Init(SHA256_CTX *c);
 int SHA224_Update(SHA256_CTX *c, const void *data, size_t len);
 int SHA224_Final(unsigned char *md, SHA256_CTX *c);
 unsigned char *SHA224(const unsigned char *d, size_t n, unsigned char *md);
+
+char *SHA224_End(SHA256_CTX *, char *);
+char *SHA224_Fd(int, char *);
+char *SHA224_FdChunk(int, char *, off_t, off_t);
+char *SHA224_File(const char *, char *);
+char *SHA224_FileChunk(const char *, char *, off_t, off_t);
+char *SHA224_Data(const void *, unsigned int, char *);
+
 int SHA256_Init(SHA256_CTX *c);
 int SHA256_Update(SHA256_CTX *c, const void *data, size_t len);
 int SHA256_Final(unsigned char *md, SHA256_CTX *c);
 unsigned char *SHA256(const unsigned char *d, size_t n, unsigned char *md);
 void SHA256_Transform(SHA256_CTX *c, const unsigned char *data);
+
+char *SHA256_End(SHA256_CTX *, char *);
+char *SHA256_Fd(int, char *);
+char *SHA256_FdChunk(int, char *, off_t, off_t);
+char *SHA256_File(const char *, char *);
+char *SHA256_FileChunk(const char *, char *, off_t, off_t);
+char *SHA256_Data(const void *, unsigned int, char *);
 
 # define SHA224_DIGEST_LENGTH    28
 # define SHA256_DIGEST_LENGTH    32
